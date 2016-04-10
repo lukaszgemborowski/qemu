@@ -320,6 +320,9 @@ static void versatile_init(MachineState *machine, int board_id)
     i2c_create_slave(i2c, "ds1338", 0x68);
     i2c_create_slave(i2c, "dummy", 0x50);
 
+    /* dummy memory mapped device */
+    sysbus_create_simple("dummy_mm", 0x10200000, NULL);
+
     /* Add PL041 AACI Interface to the LM4549 codec */
     pl041 = qdev_create(NULL, "pl041");
     qdev_prop_set_uint32(pl041, "nc_fifo_depth", 512);
