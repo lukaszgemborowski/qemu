@@ -15,6 +15,11 @@ enum i2c_event {
     I2C_NACK /* Masker NACKed a receive byte.  */
 };
 
+enum i2c_slave_status {
+	I2C_SLAVE_STATUS_OK,
+	I2C_SLAVE_STATUS_NACK,
+};
+
 typedef struct I2CSlave I2CSlave;
 
 #define TYPE_I2C_SLAVE "i2c-slave"
@@ -56,6 +61,10 @@ int i2c_bus_busy(I2CBus *bus);
 int i2c_start_transfer(I2CBus *bus, uint8_t address, int recv);
 void i2c_end_transfer(I2CBus *bus);
 void i2c_nack(I2CBus *bus);
+// for i2c device to indicate status, eg. NACK
+void i2c_set_slave_state(I2CSlave *slave, enum i2c_slave_status state);
+// can be used to query status as indicated by current slave
+enum i2c_slave_status i2c_get_and_clear_slave_state(I2CBus *bus);
 int i2c_send(I2CBus *bus, uint8_t data);
 int i2c_recv(I2CBus *bus);
 

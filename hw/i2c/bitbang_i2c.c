@@ -143,7 +143,13 @@ int bitbang_i2c_set(bitbang_i2c_interface *i2c, int line, int level)
         } else {
             i2c->state = SENDING_BIT7;
         }
-        return bitbang_i2c_ret(i2c, 0);
+
+        if (i2c_get_and_clear_slave_state(i2c->bus) == I2C_SLAVE_STATUS_NACK) {
+            bitbang_i2c_ret(i2c, 1);
+            return 1;
+        } else {
+            return bitbang_i2c_ret(i2c, 0);
+        }
 
     case RECEIVING_BIT7:
         i2c->buffer = i2c_recv(i2c->bus);

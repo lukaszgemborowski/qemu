@@ -15,6 +15,7 @@ struct I2CBus
     I2CSlave *current_dev;
     I2CSlave *dev;
     uint8_t saved_address;
+    enum i2c_slave_status slave_state;
 };
 
 static Property i2c_props[] = {
@@ -106,6 +107,7 @@ int i2c_start_transfer(I2CBus *bus, uint8_t address, int recv)
     /* If the bus is already busy, assume this is a repeated
        start condition.  */
     bus->current_dev = slave;
+    bus->slave_state = I2C_SLAVE_STATUS_OK;
     if (sc->event) {
         sc->event(slave, recv ? I2C_START_RECV : I2C_START_SEND);
     }
@@ -127,6 +129,7 @@ void i2c_end_transfer(I2CBus *bus)
     }
 
     bus->current_dev = NULL;
+    bus->slave_state = I2C_SLAVE_STATUS_OK;
 }
 
 int i2c_send(I2CBus *bus, uint8_t data)
@@ -176,6 +179,22 @@ void i2c_nack(I2CBus *bus)
     if (sc->event) {
         sc->event(dev, I2C_NACK);
     }
+}
+
+void i2c_set_slave_state(I2CSlave *slave, enum i2c_slave_status state)
+{
+	I2CBus *bus = I2C_BUS(qdev_get_parent_bus(DEVICE(slave)));
+
+	if (bus && bus->current_dev == slave) {
+		bus->slave_state = state;
+	}
+}
+
+enum i2c_slave_status i2c_get_and_clear_slave_state(I2CBus *bus)
+{
+	int state = bus->slave_state;
+	bus->slave_state = I2C_SLAVE_STATUS_OK;
+	return state;
 }
 
 static int i2c_slave_post_load(void *opaque, int version_id)

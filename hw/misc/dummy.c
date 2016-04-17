@@ -53,6 +53,12 @@ static int dummy_recv(I2CSlave *i2c)
 static int dummy_send(I2CSlave *i2c, uint8_t data)
 {
 	DUMMYState *s = DUMMY(i2c);
+
+	if (data == 15) {
+		i2c_set_slave_state(i2c, I2C_SLAVE_STATUS_NACK);
+		return 0;
+	}
+
 	s->reg_ptr = data;
 	return 0;
 }
