@@ -22,38 +22,22 @@
  * THE SOFTWARE.
  */
 
-#include "qemu/osdep.h"
-#include "qapi/error.h"
-#include "qemu-common.h"
-#include "hw/arm/arm.h"
-#include "exec/address-spaces.h"
-#include "hw/arm/stm32f103_soc.h"
+#ifndef HW_ARM_STM32F103_SOC_H
+#define HW_ARM_STM32F103_SOC_H
 
-static void stm32f103_soc_initfn(Object *obj)
-{
-}
+#include "hw/sysbus.h"
 
-static void stm32f103_soc_realize(DeviceState *dev_soc, Error **errp)
-{
-}
+#define TYPE_STM32F103_SOC "stm32f103-soc"
+#define STM32F103_SOC(obj) \
+    OBJECT_CHECK(STM32F103State, (obj), TYPE_STM32F103_SOC)
 
-static void stm32f103_soc_class_init(ObjectClass *klass, void *data)
-{
-    DeviceClass *dc = DEVICE_CLASS(klass);
-    dc->realize = stm32f103_soc_realize;
-}
+typedef struct STM32F103State {
+    /*< private >*/
+    SysBusDevice parent_obj;
+    /*< public >*/
 
-static const TypeInfo stm32f103_soc_info = {
-    .name          = TYPE_STM32F103_SOC,
-    .parent        = TYPE_SYS_BUS_DEVICE,
-    .instance_size = sizeof(STM32F103State),
-    .instance_init = stm32f103_soc_initfn,
-    .class_init    = stm32f103_soc_class_init,
-};
+    char *kernel_filename;
+    char *cpu_model;
+} STM32F103State;
 
-static void stm32f103_soc_types(void)
-{
-    type_register_static(&stm32f103_soc_info);
-}
-
-type_init(stm32f103_soc_types)
+#endif
