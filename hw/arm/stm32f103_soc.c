@@ -37,10 +37,17 @@ static void stm32f103_soc_realize(DeviceState *dev_soc, Error **errp)
 {
 }
 
+static Property stm32f103_soc_properties[] = {
+    DEFINE_PROP_STRING("kernel-filename", STM32F103State, kernel_filename),
+    DEFINE_PROP_STRING("cpu-model", STM32F103State, cpu_model),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void stm32f103_soc_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
     dc->realize = stm32f103_soc_realize;
+    dc->props = stm32f103_soc_properties;
 }
 
 static const TypeInfo stm32f103_soc_info = {
