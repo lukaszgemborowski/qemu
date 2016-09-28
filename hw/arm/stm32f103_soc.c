@@ -29,12 +29,44 @@
 #include "exec/address-spaces.h"
 #include "hw/arm/stm32f103_soc.h"
 
+#define FLASH_BASE_ADDRESS 0x08000000
+#define FLASH_SIZE (1024 * 1024)
+#define SRAM_BASE_ADDRESS 0x20000000
+#define SRAM_SIZE (128 * 1024)
+
 static void stm32f103_soc_initfn(Object *obj)
 {
 }
 
 static void stm32f103_soc_realize(DeviceState *dev_soc, Error **errp)
 {
+	STM32F103State *s = STM32F103_SOC(dev_soc);
+
+    MemoryRegion *system_memory = get_system_memory();
+    MemoryRegion *sram = g_new(MemoryRegion, 1);
+    MemoryRegion *flash = g_new(MemoryRegion, 1);
+    MemoryRegion *flash_alias = g_new(MemoryRegion, 1);
+
+    memory_region_init_ram(flash, NULL, "STM32F103.flash", FLASH_SIZE,
+                           &error_fatal);
+    memory_region_init_alias(flash_alias, NULL, "STM32F103.flash.alias",
+                             flash, 0, FLASH_SIZE);
+
+    vmstate_register_ram_global(flash);
+
+    memory_region_set_readonly(flash, true);
+    memory_region_set_readonly(flash_alias, true);
+
+    memory_region_add_subregion(system_memory, FLASH_BASE_ADDRESS, flash);
+    memory_region_add_subregion(system_memory, 0, flash_alias);
+
+    memory_region_init_ram(sram, NULL, "STM32F103.sram", SRAM_SIZE,
+                           &error_fatal);
+    vmstate_register_ram_global(sram);
+    memory_region_add_subregion(system_memory, SRAM_BASE_ADDRESS, sram);
+
+    armv7m_init(get_system_memory(), FLASH_SIZE, 96,
+                       s->kernel_filename, s->cpu_model);
 }
 
 static Property stm32f103_soc_properties[] = {
