@@ -310,6 +310,7 @@ static void versatile_init(MachineState *machine, int board_id)
 
     /* Add PL031 Real Time Clock. */
     sysbus_create_simple("pl031", 0x101e8000, pic[10]);
+    sysbus_create_simple("pl022", 0x101e9000, pic[11]);
 
     dev = sysbus_create_simple("versatile_i2c", 0x10002000, NULL);
     i2c = (I2CBus *)qdev_get_child_bus(dev, "i2c");
